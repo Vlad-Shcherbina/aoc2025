@@ -11,18 +11,39 @@ pub fn solve() void {
 
     var lines = std.mem.splitScalar(u8, std.mem.trim(u8, data, "\n"), '\n');
     var dial: i32 = 50;
-    var res: i32 = 0;
+    var part1: i32 = 0;
+    var part2: i32 = 0;
     while (lines.next()) |line| {
-        const dist = std.fmt.parseInt(i32, line[1..], 10) catch unreachable;
+        const dist = std.fmt.parseInt(u32, line[1..], 10) catch unreachable;
         switch (line[0]) {
-            'L' => dial -= dist,
-            'R' => dial += dist,
+            'L' => {
+                for (0..dist) |_| {
+                    dial -= 1;
+                    if (dial == 0) {
+                        part2 += 1;
+                    }
+                    if (dial < 0) {
+                        dial += 100;
+                    }
+                }
+            },
+            'R' => {
+                for (0..dist) |_| {
+                    dial += 1;
+                    if (dial >= 100) {
+                        dial -= 100;
+                    }
+                    if (dial == 0) {
+                        part2 += 1;
+                    }
+                }
+            },
             else => unreachable,
         }
-        dial = @mod(dial, 100);
         if (dial == 0) {
-            res += 1;
+            part1 += 1;
         }
     }
-    print("Part 1: {}\n", .{res});
+    print("Part 1: {}\n", .{part1});
+    print("Part 2: {}\n", .{part2});
 }

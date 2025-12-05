@@ -15,7 +15,7 @@ pub fn solve() void {
         for (left..right + 1) |id| {
             const s = std.fmt.bufPrint(&buf, "{}", .{id}) catch unreachable;
             if (s.len % 2 == 0) {
-                if (std.mem.eql(u8, s[0 .. s.len / 2], s[s.len / 2 .. s.len])) {
+                if (std.mem.eql(u8, s[0 .. s.len / 2], s[s.len / 2 ..])) {
                     part1 += id;
                 }
             }

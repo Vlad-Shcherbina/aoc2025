@@ -1,6 +1,7 @@
-const print = @import("std").debug.print;
-const day01 = @import("day01.zig");
 const std = @import("std");
+const print = std.debug.print;
+const day01 = @import("day01.zig");
+const day02 = @import("day02.zig");
 
 pub fn main() void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}).init;
@@ -8,6 +9,7 @@ pub fn main() void {
     const allocator = gpa.allocator();
 
     day01.solve(allocator);
+    day02.solve();
 }
 
 test "deps" {

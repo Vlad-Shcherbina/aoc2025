@@ -2,6 +2,7 @@ const std = @import("std");
 const print = std.debug.print;
 
 pub fn solve(allocator: std.mem.Allocator) void {
+    print("Day 1\n", .{});
     const data = std.fs.cwd().readFileAlloc(allocator, "data/day01.txt", 1024 * 1024) catch unreachable;
     defer allocator.free(data);
 
@@ -40,6 +41,6 @@ pub fn solve(allocator: std.mem.Allocator) void {
             part1 += 1;
         }
     }
-    print("Part 1: {}\n", .{part1});
-    print("Part 2: {}\n", .{part2});
+    print("  part 1: {}\n", .{part1});
+    print("  part 2: {}\n", .{part2});
 }

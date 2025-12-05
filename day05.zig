@@ -34,27 +34,18 @@ pub fn solve(allocator: std.mem.Allocator) void {
     }
     print("  part 1: {}\n", .{part1});
 
-    const Endpoint = struct { x: i64, is_left: bool };
-    const endpoints = allocator.alloc(Endpoint, ranges.items.len * 2) catch unreachable;
-    defer allocator.free(endpoints);
-    for (ranges.items, 0..) |r, i| {
-        endpoints[2 * i] = .{ .x = r.lo, .is_left = true };
-        endpoints[2 * i + 1] = .{ .x = r.hi + 1, .is_left = false };
-    }
-    std.mem.sort(Endpoint, endpoints, {}, struct {
-        fn lessThan(_: void, a: Endpoint, b: Endpoint) bool {
-            return a.x < b.x or a.x == b.x and a.is_left and !b.is_left;
+    std.mem.sort(Range, ranges.items, {}, struct {
+        fn lessThan(_: void, a: Range, b: Range) bool {
+            return a.lo < b.lo;
         }
     }.lessThan);
-    var k: i32 = 0;
     var part2: i64 = 0;
-    for (endpoints) |e| {
-        if (e.is_left) {
-            if (k == 0) part2 -= e.x;
-            k += 1;
-        } else {
-            k -= 1;
-            if (k == 0) part2 += e.x;
+    var r: i64 = std.math.minInt(i64);
+    for (ranges.items) |range| {
+        const h = range.hi + 1;
+        if (h > r) {
+            part2 += h - @max(r, range.lo);
+            r = h;
         }
     }
     print("  part 2: {}\n", .{part2});

@@ -1,11 +1,7 @@
 const std = @import("std");
 const print = std.debug.print;
 
-pub fn solve() void {
-    var gpa = std.heap.GeneralPurposeAllocator(.{}).init;
-    defer _ = gpa.deinit();
-    const allocator = gpa.allocator();
-
+pub fn solve(allocator: std.mem.Allocator) void {
     const data = std.fs.cwd().readFileAlloc(allocator, "data/day01.txt", 1024 * 1024) catch unreachable;
     defer allocator.free(data);
 

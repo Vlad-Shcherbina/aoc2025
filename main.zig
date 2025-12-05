@@ -3,7 +3,11 @@ const day01 = @import("day01.zig");
 const std = @import("std");
 
 pub fn main() void {
-    day01.solve();
+    var gpa = std.heap.GeneralPurposeAllocator(.{}).init;
+    defer _ = gpa.deinit();
+    const allocator = gpa.allocator();
+
+    day01.solve(allocator);
 }
 
 test "deps" {

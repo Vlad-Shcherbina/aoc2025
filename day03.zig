@@ -6,23 +6,24 @@ pub fn solve(allocator: std.mem.Allocator) void {
     const data = std.fs.cwd().readFileAlloc(allocator, "data/day03.txt", 1024 * 1024) catch unreachable;
     defer allocator.free(data);
 
-    var part1: i32 = 0;
+    var part2: i64 = 0;
     var lines = std.mem.splitScalar(u8, std.mem.trimEnd(u8, data, "\n"), '\n');
     while (lines.next()) |line| {
-        var idx1: usize = 0;
-        for (1..line.len - 1) |i| {
-            if (line[i] > line[idx1]) {
-                idx1 = i;
+        var t: i64 = 0;
+        var idx: usize = 0;
+        const size = 12;
+        for (0..size) |i| {
+            for (idx + 1..line.len - size + i + 1) |j| {
+                if (line[j] > line[idx]) {
+                    idx = j;
+                }
             }
+            t *= 10;
+            t += line[idx] - '0';
+            idx += 1;
         }
-        var idx2 = idx1 + 1;
-        for (idx1 + 2..line.len) |i| {
-            if (line[i] > line[idx2]) {
-                idx2 = i;
-            }
-        }
-        const t = (line[idx1] - '0') * 10 + line[idx2] - '0';
-        part1 += t;
+        part2 += t;
+        print("{s} {}\n", .{ line, t });
     }
-    print("  part 1: {}\n", .{part1});
+    print("  part 2: {}\n", .{part2});
 }

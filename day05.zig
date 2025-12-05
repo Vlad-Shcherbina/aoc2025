@@ -7,7 +7,7 @@ pub fn solve(allocator: std.mem.Allocator) void {
     defer allocator.free(data);
     const split = std.mem.indexOf(u8, data, "\n\n").?;
 
-    const Range = struct { i64, i64 };
+    const Range = struct { lo: i64, hi: i64 };
     var ranges = std.array_list.Managed(Range).init(allocator);
     defer ranges.deinit();
 
@@ -16,7 +16,7 @@ pub fn solve(allocator: std.mem.Allocator) void {
         const i = std.mem.indexOfScalar(u8, range, '-').?;
         const a = std.fmt.parseInt(i64, range[0..i], 10) catch unreachable;
         const b = std.fmt.parseInt(i64, range[i + 1 ..], 10) catch unreachable;
-        ranges.append(.{ a, b }) catch unreachable;
+        ranges.append(.{ .lo = a, .hi = b }) catch unreachable;
     }
 
     var part1: i32 = 0;
@@ -26,7 +26,7 @@ pub fn solve(allocator: std.mem.Allocator) void {
 
         var fresh = false;
         for (ranges.items) |r| {
-            if (r.@"0" <= id and id <= r.@"1") {
+            if (r.lo <= id and id <= r.hi) {
                 fresh = true;
                 break;
             }

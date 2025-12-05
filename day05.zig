@@ -10,7 +10,6 @@ pub fn solve(allocator: std.mem.Allocator) void {
     const Range = struct { lo: i64, hi: i64 };
     var ranges = std.array_list.Managed(Range).init(allocator);
     defer ranges.deinit();
-
     var ranges_iter = std.mem.splitScalar(u8, data[0..split], '\n');
     while (ranges_iter.next()) |range| {
         const i = std.mem.indexOfScalar(u8, range, '-').?;
@@ -34,4 +33,29 @@ pub fn solve(allocator: std.mem.Allocator) void {
         if (fresh) part1 += 1;
     }
     print("  part 1: {}\n", .{part1});
+
+    const Endpoint = struct { x: i64, is_left: bool };
+    const endpoints = allocator.alloc(Endpoint, ranges.items.len * 2) catch unreachable;
+    defer allocator.free(endpoints);
+    for (ranges.items, 0..) |r, i| {
+        endpoints[2 * i] = .{ .x = r.lo, .is_left = true };
+        endpoints[2 * i + 1] = .{ .x = r.hi + 1, .is_left = false };
+    }
+    std.mem.sort(Endpoint, endpoints, {}, struct {
+        fn lessThan(_: void, a: Endpoint, b: Endpoint) bool {
+            return a.x < b.x or a.x == b.x and a.is_left and !b.is_left;
+        }
+    }.lessThan);
+    var k: i32 = 0;
+    var part2: i64 = 0;
+    for (endpoints) |e| {
+        if (e.is_left) {
+            if (k == 0) part2 -= e.x;
+            k += 1;
+        } else {
+            k -= 1;
+            if (k == 0) part2 += e.x;
+        }
+    }
+    print("  part 2: {}\n", .{part2});
 }

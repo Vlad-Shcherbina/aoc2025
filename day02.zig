@@ -5,6 +5,7 @@ pub fn solve() void {
     print("Day 2\n", .{});
     const data = @embedFile("data/day02.txt");
     var part1: u64 = 0;
+    var part2: u64 = 0;
     var ranges = std.mem.splitScalar(u8, std.mem.trim(u8, data, "\n"), ',');
     while (ranges.next()) |range| {
         var it = std.mem.splitScalar(u8, range, '-');
@@ -14,12 +15,20 @@ pub fn solve() void {
         var buf: [20]u8 = undefined;
         for (left..right + 1) |id| {
             const s = std.fmt.bufPrint(&buf, "{}", .{id}) catch unreachable;
-            if (s.len % 2 == 0) {
-                if (std.mem.eql(u8, s[0 .. s.len / 2], s[s.len / 2 ..])) {
-                    part1 += id;
+            var valid = true;
+            for (2..s.len + 1) |d| {
+                if (s.len % d > 0) continue;
+                const len = s.len / d;
+                const all_eq = std.mem.eql(u8, s[0 .. s.len - len], s[len..]);
+                if (all_eq) {
+                    if (d == 2) part1 += id;
+                    valid = false;
+                    break;
                 }
             }
+            if (!valid) part2 += id;
         }
     }
     print("  part 1: {}\n", .{part1});
+    print("  part 2: {}\n", .{part2});
 }

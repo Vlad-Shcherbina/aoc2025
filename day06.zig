@@ -18,7 +18,7 @@ pub fn solve(allocator: std.mem.Allocator) void {
 
     var ops_iter: std.mem.TokenIterator(u8, .scalar) = std.mem.tokenizeScalar(u8, ops, ' ');
     var input_iters: [k]std.mem.TokenIterator(u8, .scalar) = undefined;
-    for (&inputs, &input_iters) |input, *input_iter| {
+    for (inputs, &input_iters) |input, *input_iter| {
         input_iter.* = std.mem.tokenizeScalar(u8, input, ' ');
     }
 
@@ -30,11 +30,11 @@ pub fn solve(allocator: std.mem.Allocator) void {
         }
         if (std.mem.eql(u8, op, "+")) {
             var s: i64 = 0;
-            for (&xs) |x| s += x;
+            for (xs) |x| s += x;
             grand_total += s;
         } else if (std.mem.eql(u8, op, "*")) {
             var p: i64 = 1;
-            for (&xs) |x| p *= x;
+            for (xs) |x| p *= x;
             grand_total += p;
         } else unreachable;
     }

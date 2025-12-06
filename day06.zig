@@ -40,4 +40,44 @@ pub fn solve(allocator: std.mem.Allocator) void {
     }
     for (&input_iters) |*input_iter| std.debug.assert(input_iter.next() == null);
     print("  part 1: {}\n", .{grand_total});
+
+    var part2: i64 = 0;
+    for (inputs) |input| std.debug.assert(input.len == ops.len);
+    var current_op: ?u8 = null;
+    var buffer: [10]i64 = undefined;
+    var xs = std.ArrayListUnmanaged(i64).initBuffer(&buffer);
+    for (ops, 0..) |op, i| {
+        if (op != ' ') current_op = op;
+        var x: i64 = 0;
+        for (inputs) |input| {
+            if (input[i] != ' ') {
+                x *= 10;
+                x += input[i] - '0';
+            }
+        }
+        if (x == 0) { // all spaces
+            if (current_op == '+') {
+                var s: i64 = 0;
+                for (xs.items) |x1| s += x1;
+                part2 += s;
+            } else if (current_op == '*') {
+                var p: i64 = 1;
+                for (xs.items) |x1| p *= x1;
+                part2 += p;
+            } else unreachable;
+            xs.clearRetainingCapacity();
+        } else {
+            xs.appendBounded(x) catch unreachable;
+        }
+    }
+    if (current_op == '+') {
+        var s: i64 = 0;
+        for (xs.items) |x1| s += x1;
+        part2 += s;
+    } else if (current_op == '*') {
+        var p: i64 = 1;
+        for (xs.items) |x1| p *= x1;
+        part2 += p;
+    } else unreachable;
+    print("  part 2: {}\n", .{part2});
 }

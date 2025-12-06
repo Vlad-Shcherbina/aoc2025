@@ -22,7 +22,7 @@ pub fn solve(allocator: std.mem.Allocator) void {
         input_iter.* = std.mem.tokenizeScalar(u8, input, ' ');
     }
 
-    var grand_total: i64 = 0;
+    var part1: i64 = 0;
     while (ops_iter.next()) |op| {
         var xs: [k]i64 = undefined;
         for (&input_iters, &xs) |*input_iter, *x| {
@@ -31,15 +31,15 @@ pub fn solve(allocator: std.mem.Allocator) void {
         if (std.mem.eql(u8, op, "+")) {
             var s: i64 = 0;
             for (xs) |x| s += x;
-            grand_total += s;
+            part1 += s;
         } else if (std.mem.eql(u8, op, "*")) {
             var p: i64 = 1;
             for (xs) |x| p *= x;
-            grand_total += p;
+            part1 += p;
         } else unreachable;
     }
     for (&input_iters) |*input_iter| std.debug.assert(input_iter.next() == null);
-    print("  part 1: {}\n", .{grand_total});
+    print("  part 1: {}\n", .{part1});
 
     var part2: i64 = 0;
     for (inputs) |input| std.debug.assert(input.len == ops.len);
@@ -56,28 +56,24 @@ pub fn solve(allocator: std.mem.Allocator) void {
             }
         }
         if (x == 0) { // all spaces
-            if (current_op == '+') {
-                var s: i64 = 0;
-                for (xs.items) |x1| s += x1;
-                part2 += s;
-            } else if (current_op == '*') {
-                var p: i64 = 1;
-                for (xs.items) |x1| p *= x1;
-                part2 += p;
-            } else unreachable;
+            part2 += reduce(xs.items, current_op);
             xs.clearRetainingCapacity();
         } else {
             xs.appendBounded(x) catch unreachable;
         }
     }
-    if (current_op == '+') {
-        var s: i64 = 0;
-        for (xs.items) |x1| s += x1;
-        part2 += s;
-    } else if (current_op == '*') {
-        var p: i64 = 1;
-        for (xs.items) |x1| p *= x1;
-        part2 += p;
-    } else unreachable;
+    part2 += reduce(xs.items, current_op);
     print("  part 2: {}\n", .{part2});
+}
+
+fn reduce(xs: []const i64, op: ?u8) i64 {
+    if (op == '+') {
+        var s: i64 = 0;
+        for (xs) |x1| s += x1;
+        return s;
+    } else if (op == '*') {
+        var p: i64 = 1;
+        for (xs) |x1| p *= x1;
+        return p;
+    } else unreachable;
 }

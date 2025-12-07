@@ -9,45 +9,49 @@ pub fn solve(allocator: std.mem.Allocator) void {
     var lines = std.mem.splitScalar(u8, std.mem.trim(u8, data, "\n"), '\n');
     const start_line = lines.next().?;
 
-    const buf = allocator.alloc(usize, start_line.len) catch unreachable;
-    const buf2 = allocator.alloc(usize, start_line.len) catch unreachable;
+    const buf = allocator.alloc(Pair, start_line.len) catch unreachable;
+    const buf2 = allocator.alloc(Pair, start_line.len) catch unreachable;
     defer allocator.free(buf);
     defer allocator.free(buf2);
-    var tachions = std.ArrayList(usize).initBuffer(buf);
-    var tachions2 = std.ArrayList(usize).initBuffer(buf2);
+    var tachions = std.ArrayList(Pair).initBuffer(buf);
+    var tachions2 = std.ArrayList(Pair).initBuffer(buf2);
 
     const start = std.mem.indexOfScalar(u8, start_line, 'S').?;
-    tachions.appendBounded(start) catch unreachable;
+    tachions.appendBounded(.{ .idx = start, .cnt = 1 }) catch unreachable;
 
     var part1: i32 = 0;
     while (lines.next()) |line| {
         tachions2.clearRetainingCapacity();
-        for (tachions.items) |i| {
-            switch (line[i]) {
+        for (tachions.items) |p| {
+            switch (line[p.idx]) {
                 '.' => {
-                    if (last(usize, tachions2.items) != i) {
-                        tachions2.appendBounded(i) catch unreachable;
-                    }
+                    add_last(&tachions2, p);
                 },
                 '^' => {
                     part1 += 1;
-                    if (last(usize, tachions2.items) != i - 1) {
-                        tachions2.appendBounded(i - 1) catch unreachable;
-                    }
-                    tachions2.appendBounded(i + 1) catch unreachable;
+                    add_last(&tachions2, .{ .idx = p.idx - 1, .cnt = p.cnt });
+                    add_last(&tachions2, .{ .idx = p.idx + 1, .cnt = p.cnt });
                 },
                 else => unreachable,
             }
         }
-        std.mem.swap(std.ArrayList(usize), &tachions, &tachions2);
+        std.mem.swap(std.ArrayList(Pair), &tachions, &tachions2);
     }
     print("  part 1: {}\n", .{part1});
+    var part2: i64 = 0;
+    for (tachions.items) |p| part2 += p.cnt;
+    print("  part 2: {}\n", .{part2});
 }
 
-fn last(T: type, xs: []const T) ?T {
-    if (xs.len == 0) {
-        return null;
+const Pair = struct {
+    idx: usize,
+    cnt: i64,
+};
+
+fn add_last(xs: *std.ArrayList(Pair), p: Pair) void {
+    if (xs.items.len > 0 and xs.items[xs.items.len - 1].idx == p.idx) {
+        xs.items[xs.items.len - 1].cnt += p.cnt;
     } else {
-        return xs[xs.len - 1];
+        xs.appendBounded(p) catch unreachable;
     }
 }

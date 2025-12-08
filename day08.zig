@@ -44,25 +44,31 @@ pub fn solve(allocator: std.mem.Allocator) void {
     const buf = allocator.alloc(usize, pts.items.len) catch unreachable;
     defer allocator.free(buf);
     var dsu = DSU.init(buf);
-    var num_merges: usize = 0;
-    for (edges.items[0..1000]) |edge| {
+    var num_components: usize = pts.items.len;
+    for (edges.items, 1..) |edge, i| {
         if (dsu.find(edge.a) != dsu.find(edge.b)) {
             dsu.merge(edge.a, edge.b);
-            num_merges += 1;
+            num_components -= 1;
+            if (num_components == 1) {
+                print("  part 2: {}\n", .{pts.items[edge.a][0] * pts.items[edge.b][0]});
+                break;
+            }
+        }
+        if (i == 1000) {
+            const sizes = allocator.alloc(usize, pts.items.len) catch unreachable;
+            defer allocator.free(sizes);
+            @memset(sizes, 0);
+            for (0..pts.items.len) |j| {
+                sizes[dsu.find(j)] += 1;
+            }
+            std.mem.sort(usize, sizes, {}, struct {
+                fn lessThan(_: void, a: usize, b: usize) bool {
+                    return a > b;
+                }
+            }.lessThan);
+            print("  part 1: {}\n", .{sizes[0] * sizes[1] * sizes[2]});
         }
     }
-    const sizes = allocator.alloc(usize, pts.items.len) catch unreachable;
-    defer allocator.free(sizes);
-    @memset(sizes, 0);
-    for (0..pts.items.len) |i| {
-        sizes[dsu.find(i)] += 1;
-    }
-    std.mem.sort(usize, sizes, {}, struct {
-        fn lessThan(_: void, a: usize, b: usize) bool {
-            return a > b;
-        }
-    }.lessThan);
-    print("  part 1: {}\n", .{sizes[0] * sizes[1] * sizes[2]});
 }
 
 const DSU = struct {

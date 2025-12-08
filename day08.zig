@@ -6,7 +6,7 @@ pub fn solve(allocator: std.mem.Allocator) void {
     const data = std.fs.cwd().readFileAlloc(allocator, "data/day08.txt", 1024 * 1024) catch unreachable;
     defer allocator.free(data);
 
-    const Pt = [3]i64;
+    const Pt = struct { x: i64, y: i64, z: i64 };
     var pts = std.ArrayList(Pt).empty;
     defer pts.deinit(allocator);
     var lines = std.mem.splitScalar(u8, std.mem.trimEnd(u8, data, "\n"), '\n');
@@ -16,7 +16,7 @@ pub fn solve(allocator: std.mem.Allocator) void {
         const y = std.fmt.parseInt(i64, it.next().?, 10) catch unreachable;
         const z = std.fmt.parseInt(i64, it.next().?, 10) catch unreachable;
         std.debug.assert(it.next() == null);
-        pts.append(allocator, .{ x, y, z }) catch unreachable;
+        pts.append(allocator, .{ .x = x, .y = y, .z = z }) catch unreachable;
     }
 
     const Edge = struct {
@@ -28,9 +28,9 @@ pub fn solve(allocator: std.mem.Allocator) void {
     defer edges.deinit(allocator);
     for (pts.items, 0..) |pa, i| {
         for (pts.items[0..i], 0..) |pb, j| {
-            const dx = pa[0] - pb[0];
-            const dy = pa[1] - pb[1];
-            const dz = pa[2] - pb[2];
+            const dx = pa.x - pb.x;
+            const dy = pa.y - pb.y;
+            const dz = pa.z - pb.z;
             const dist2 = dx * dx + dy * dy + dz * dz;
             edges.append(allocator, .{ .a = i, .b = j, .dist2 = dist2 }) catch unreachable;
         }
@@ -46,11 +46,10 @@ pub fn solve(allocator: std.mem.Allocator) void {
     var dsu = DSU.init(buf);
     var num_components: usize = pts.items.len;
     for (edges.items, 1..) |edge, i| {
-        if (dsu.find(edge.a) != dsu.find(edge.b)) {
-            dsu.merge(edge.a, edge.b);
+        if (dsu.merge(edge.a, edge.b)) {
             num_components -= 1;
             if (num_components == 1) {
-                print("  part 2: {}\n", .{pts.items[edge.a][0] * pts.items[edge.b][0]});
+                print("  part 2: {}\n", .{pts.items[edge.a].x * pts.items[edge.b].x});
                 break;
             }
         }
@@ -85,10 +84,12 @@ const DSU = struct {
         }
         return self.parent[x];
     }
-    fn merge(self: *DSU, a: usize, b: usize) void {
+    fn merge(self: *DSU, a: usize, b: usize) bool {
         const ra = self.find(a);
         const rb = self.find(b);
+        if (ra == rb) return false;
         self.parent[ra] = rb;
+        return true;
     }
 };
 
